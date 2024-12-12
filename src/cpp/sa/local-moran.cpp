@@ -25,7 +25,7 @@ geoda::LisaResult geoda::local_moran(const std::vector<double>& data,
     }
   }
   int nCPUs = 1;
-  std::string perm_method = "complete";
+  std::string perm_method = "LookupTable";
   // create a GeoDaWeight object from neighbors vector
   GeoDaWeight* w = new VectorWeight(neighbors);
 

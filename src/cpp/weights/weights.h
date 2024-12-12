@@ -84,6 +84,45 @@ std::vector<std::vector<unsigned int>> polygon_contiguity_weights(const Geometry
                                                                   bool include_lower_order = false);
 
 /**
+ * @brief  Compute contiguity weights for a collection of polygons using a threshold for precision
+ *
+ * @param geoms The polygon collection
+ * @param is_queen If true, use queen contiguity, otherwise use rook contiguity
+ * @param precision_threshold The precision threshold for comparing coordinates to determine if two points are the same
+ * @param order_contiguity The order of contiguity
+ * @param include_lower_order If true, include lower order contiguity
+ * @return std::vector<std::vector<unsigned int>> The 2D vector of contiguity weights
+ */
+std::vector<std::vector<unsigned int>> polygon_contiguity_weights_threshold(const GeometryCollection& geoms,
+                                                                            bool is_queen,
+                                                                            double precision_threshold = 0.0,
+                                                                            unsigned int order_contiguity = 1,
+                                                                            bool include_lower_order = false);
+/**
+ * @brief Compute queen contiguity weights for a collection of polygons using a simple algorithm
+ *
+ * @param geoms The polygon collection
+ * @param order_contiguity The order of contiguity
+ * @param include_lower_order If true, include lower order contiguity
+ * @return std::vector<std::vector<unsigned int>> The 2D vector of contiguity weights
+ */
+std::vector<std::vector<unsigned int>> simple_polygon_queen_weights(const GeometryCollection& geoms,
+                                                                    unsigned int order_contiguity = 1,
+                                                                    bool include_lower_order = false);
+
+/**
+ * @brief Compute rook contiguity weights for a collection of polygons using a simple algorithm
+ *
+ * @param geoms The polygon collection
+ * @param order_contiguity The order of contiguity
+ * @param include_lower_order If true, include lower order contiguity
+ * @return std::vector<std::vector<unsigned int>> The 2D vector of contiguity weights
+ */
+std::vector<std::vector<unsigned int>> simple_polygon_rook_weights(const GeometryCollection& geoms,
+                                                                   unsigned int order_contiguity = 1,
+                                                                   bool include_lower_order = false);
+
+/**
  * @brief Check if two points are equal within a precision threshold
  *
  * @param p1 The first point

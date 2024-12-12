@@ -43,7 +43,7 @@ geoda::LisaResult geoda::quantile_lisa(int k, int quantile, const std::vector<do
   }
   int nCPUs = 1;
   // note: crash when using LookupTable for localG
-  std::string perm_method = "complete";
+  std::string perm_method = "LookupTable";
   // create a GeoDaWeight object from neighbors vector
   GeoDaWeight* w = new VectorWeight(neighbors);
 

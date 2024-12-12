@@ -5,7 +5,8 @@ export {
   resetWASM as resetGeoDa,
   setWASM as setGeoDa,
   getWASM as getGeoDa,
-  setDeliveryWASM as setGeoDaDelivery
+  setDeliveryWASM as setGeoDaDelivery,
+  getDeliveryWASM as getGeoDaDelivery
 } from './init';
 
 export * from './weights/distance-neighbors';

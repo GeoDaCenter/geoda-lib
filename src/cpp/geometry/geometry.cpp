@@ -104,7 +104,6 @@ PolygonCollection::PolygonCollection(const std::vector<double>& in_x, const std:
     }
     polygons.push_back(boost_mp);
   }
-  std::cout << "polygons size: " << polygons.size() << std::endl;
 }
 
 void PolygonCollection::get_polygon(size_t polygon_index, Polygon& poly) {
@@ -146,6 +145,19 @@ int PolygonCollection::get_part(size_t polygon_index, size_t part_index) const {
   }
   return parts[part_offset + part_index] - parts[part_offset];
 }
+
+// size_t PolygonCollection::get_point_pos(size_t polygon_index, size_t point_index) const {
+//   int num_parts = sizes[polygon_index];
+//   int part_offset = 0;
+//   for (int i = 0; i < polygon_index; ++i) {
+//     // an empty polygon (num_parts==0) should offset 1
+//     int offset_part = sizes[i] == 0 ? 1 : sizes[i];
+//     part_offset += offset_part;
+//   }
+//   int start = parts[part_offset];
+//   int k = point_index + start;
+//   return k;
+// }
 
 point_type PolygonCollection::get_point(size_t polygon_index, size_t point_index) const {
   point_type pt;

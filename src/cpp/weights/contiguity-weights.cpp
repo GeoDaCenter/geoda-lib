@@ -1,4 +1,7 @@
 #include <algorithm>
+#include <boost/geometry/geometries/box.hpp>
+#include <boost/geometry/index/rtree.hpp>
+#include <boost/unordered_map.hpp>
 #include <iostream>
 #include <set>
 #include <stack>
@@ -15,6 +18,21 @@
 // #define JCV_ATAN2 atan2
 // #define JCV_FLT_MAX 1.7976931348623157E+30
 #include "utils/jc_voronoi.h"
+
+struct Point2D {
+  double x, y;
+  bool operator==(const Point2D& other) const { return x == other.x && y == other.y; }
+};
+
+// Custom hash function for Point2D
+struct Point2DHash {
+  std::size_t operator()(const Point2D& p) const {
+    // Combine hashes of x and y using bit operations
+    std::size_t h1 = std::hash<double>{}(p.x);
+    std::size_t h2 = std::hash<double>{}(p.y);
+    return h1 ^ (h2 << 1);
+  }
+};
 
 std::string jcv_point_str(const jcv_point& pt) {
   std::stringstream ss;
@@ -110,13 +128,149 @@ geoda::GalElement* neighbors_to_gal(std::vector<std::set<int>>& nbr_map) {
   return gal;
 }
 
+// New utility function
+std::vector<std::vector<unsigned int>> convert_to_weights(const std::vector<std::set<int>>& nbr_map,
+                                                          unsigned int order_contiguity = 1,
+                                                          bool include_lower_order = false) {
+  size_t num_obs = nbr_map.size();
+
+  // Create GAL from neighbor map
+  geoda::GalElement* gal = new geoda::GalElement[num_obs];
+  for (size_t i = 0; i < num_obs; ++i) {
+    gal[i].SetSizeNbrs(nbr_map[i].size());
+    size_t cnt = 0;
+    for (int nbr : nbr_map[i]) {
+      gal[i].SetNbr(cnt++, nbr);
+    }
+  }
+
+  // Handle higher order contiguity if needed
+  if (order_contiguity > 1) {
+    make_higher_ord_contiguity(order_contiguity, num_obs, gal, include_lower_order);
+  }
+
+  // Convert to result vector
+  std::vector<std::vector<unsigned int>> result_vec(num_obs);
+  for (size_t i = 0; i < num_obs; ++i) {
+    result_vec[i].reserve(gal[i].Size());
+    for (size_t j = 0; j < gal[i].Size(); ++j) {
+      result_vec[i].push_back(gal[i][j]);
+    }
+  }
+
+  delete[] gal;
+  return result_vec;
+}
+
+std::vector<std::vector<unsigned int>> geoda::simple_polygon_queen_weights(const geoda::GeometryCollection& geoms,
+                                                                           unsigned int order_contiguity,
+                                                                           bool include_lower_order) {
+  std::cout << "simple_polygon_queen_weights 1" << std::endl;
+
+  // create a dictionary using the points of the polygon as keys and the polygon indexes as values
+  boost::unordered_map<double, boost::unordered_map<double, std::set<int>>> point_to_polygon;
+  const std::vector<unsigned int>& sizes = geoms.sizes;
+  const std::vector<unsigned int>& parts = geoms.parts;
+  int part_index = 0;
+  int num_points = geoms.x.size();
+  int num_all_parts = parts.size();
+  size_t num_polys = geoms.size();
+
+  for (int i = 0; i < num_polys; ++i) {
+    int num_parts = sizes[i];
+    int inner_parts = 0;
+    for (int j = part_index; j < part_index + num_parts; ++j) {
+      int start = parts[j];
+      int end = j == num_all_parts - 1 ? num_points : parts[j + 1];
+      for (int k = start; k < end; ++k) {
+        double lat = geoms.y[k], lng = geoms.x[k];
+        point_to_polygon[lng][lat].insert(i);
+      }
+    }
+    // offset the index to visit parts[]: an empty polygon (num_parts==0) should offset 1
+    int offset_part = num_parts == 0 ? 1 : num_parts;
+    part_index += offset_part;
+  }
+
+  std::cout << "simple_polygon_queen_weights 2" << std::endl;
+
+  // Create neighbor map
+  std::vector<std::set<int>> nbr_map(geoms.size());
+
+  // iterate through the point_to_polygon
+  boost::unordered_map<double, boost::unordered_map<double, std::set<int>>>::iterator it;
+  for (it = point_to_polygon.begin(); it != point_to_polygon.end(); ++it) {
+    boost::unordered_map<double, std::set<int>>& lng_to_polys = it->second;
+    boost::unordered_map<double, std::set<int>>::iterator jt;
+    for (jt = lng_to_polys.begin(); jt != lng_to_polys.end(); ++jt) {
+      const std::set<int>& polys = jt->second;
+      // iterator through the polys from begin to end
+      for (std::set<int>::iterator kt = polys.begin(); kt != polys.end(); ++kt) {
+        // iterator through polys from kt+1 to end
+        for (std::set<int>::iterator lt = std::next(kt); lt != polys.end(); ++lt) {
+          if (*kt != *lt) {
+            nbr_map[*kt].insert(*lt);
+            nbr_map[*lt].insert(*kt);
+          }
+        }
+      }
+    }
+  }
+
+  std::cout << "simple_polygon_queen_weights 3" << std::endl;
+  return convert_to_weights(nbr_map, order_contiguity, include_lower_order);
+}
+
+std::vector<std::vector<unsigned int>> geoda::simple_polygon_rook_weights(const geoda::GeometryCollection& geoms,
+                                                                          unsigned int order_contiguity,
+                                                                          bool include_lower_order) {
+  // this implementation is for rook contiguity weights when precision_threshold is 0
+  // which means the intersection between polygons is tested by two polygons sharing an edge
+  // the algorithm should be simple by checking if any edge is shared by two polygons
+
+  std::unordered_map<std::string, std::set<unsigned int>> edge_to_polygon;
+
+  for (size_t i = 0; i < geoms.size(); ++i) {
+    for (size_t j = 0; j < geoms.get_num_points(i); ++j) {
+      const point_type& pt1 = geoms.get_point(i, j);
+      size_t next_j = (j + 1) % geoms.get_num_points(i);
+      const point_type& pt2 = geoms.get_point(i, next_j);
+      std::stringstream ss;
+      ss << pt1.get<0>() << "," << pt1.get<1>() << "," << pt2.get<0>() << "," << pt2.get<1>();
+      edge_to_polygon[ss.str()].insert(i);
+    }
+  }
+
+  // Create neighbor map
+  std::vector<std::set<int>> nbr_map(geoms.size());
+
+  // iterate through the edge_to_polygon, intersected polygons are neighbors
+  for (const auto& edge_polys : edge_to_polygon) {
+    const std::set<unsigned int>& polys = edge_polys.second;
+  }
+
+  return convert_to_weights(nbr_map, order_contiguity, include_lower_order);
+}
+
 std::vector<std::vector<unsigned int>> geoda::polygon_contiguity_weights(const geoda::GeometryCollection& geoms,
                                                                          bool is_queen, double precision_threshold,
                                                                          unsigned int order_contiguity,
                                                                          bool include_lower_order) {
+  if (precision_threshold == 0.0) {
+    return is_queen ? simple_polygon_queen_weights(geoms, order_contiguity, include_lower_order)
+                    : simple_polygon_rook_weights(geoms, order_contiguity, include_lower_order);
+  } else {
+    return polygon_contiguity_weights_threshold(geoms, is_queen, precision_threshold, order_contiguity,
+                                                include_lower_order);
+  }
+}
+
+std::vector<std::vector<unsigned int>> geoda::polygon_contiguity_weights_threshold(
+    const geoda::GeometryCollection& geoms, bool is_queen, double precision_threshold, unsigned int order_contiguity,
+    bool include_lower_order) {
   // # of records of geometry
   unsigned int gRecords = geoms.size();
- 
+
   // bounding box for the entire map
   // partition constructed on lower(x) and upper(x) for each polygon
   geoda::BasePartition gMinX, gMaxX;
@@ -227,34 +381,7 @@ std::vector<std::vector<unsigned int>> geoda::polygon_contiguity_weights(const g
   if (gYPartition) delete gYPartition;
   gYPartition = NULL;
 
-  // Create gal from nbr_map
-  geoda::GalElement* gal = new geoda::GalElement[gRecords];
-  for (size_t i = 0; i < gRecords; ++i) {
-    size_t nbr_sz = nbr_map[i].size();
-    gal[i].SetSizeNbrs(nbr_sz);
-    size_t cnt = 0;
-    for (std::set<int>::iterator it = nbr_map[i].begin(); it != nbr_map[i].end(); ++it) {
-      gal[i].SetNbr(cnt++, *it);
-    }
-    // gal[i].SortNbrs();
-    // gal[i].ReverseNbrs();
-  }
-
-  // make higher order contiguity
-  if (order_contiguity > 1) {
-    make_higher_ord_contiguity(order_contiguity, gRecords, gal, include_lower_order);
-  }
-  // convert GalElement to std::vector<std::vector<unsigned int>>
-  std::vector<std::vector<unsigned int>> result_vec(gRecords);
-  for (size_t i = 0; i < gRecords; ++i) {
-    for (size_t j = 0; j < gal[i].Size(); ++j) {
-      result_vec[i].push_back(gal[i][j]);
-    }
-  }
-
-  // clean up gal
-  delete[] gal;
-  return result_vec;
+  return convert_to_weights(nbr_map, order_contiguity, include_lower_order);
 }
 
 std::vector<std::vector<unsigned int>> geoda::point_contiguity_weights(const geoda::GeometryCollection& geoms,

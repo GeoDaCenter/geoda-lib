@@ -13,21 +13,31 @@ type UnsignedLong = number;
 type Float = number;
 type Double = number;
 
+/**
+ * Base class for geometry collections
+ */
 export class GeometryCollection {
+  /**
+   * Constructor for the base geometry collection class
+   */
+  constructor();
   delete(): void;
 }
 
 /**
- * @param xs VectorDouble Array of x coordinates
- * @param ys VectorDouble Array of y coordinates
- * @param parts VectorUInt Array of indices into xs/ys where each part starts
- * @param holes VectorUInt Array of indices into parts where each hole starts
- * @param sizes VectorUInt Array of number of parts for each feature
- * @param fixPolygon boolean Whether to fix polygon
- * @param convertToUTM boolean Whether to convert to UTM
- * @returns PolygonCollection
+ * PolygonCollection class.
  */
 export class PolygonCollection extends GeometryCollection {
+  /**
+   * Constructor for the polygon collection class
+   * @param xs VectorDouble Array of x coordinates
+   * @param ys VectorDouble Array of y coordinates
+   * @param parts VectorUInt Array of indices into xs/ys where each part starts
+   * @param holes VectorUInt Array of indices into parts where each hole starts
+   * @param sizes VectorUInt Array of number of parts for each feature
+   * @param fixPolygon boolean Whether to fix polygon
+   * @param convertToUTM boolean Whether to convert to UTM
+   */
   constructor(
     xs: VectorDouble,
     ys: VectorDouble,
@@ -43,13 +53,17 @@ export class PolygonCollection extends GeometryCollection {
 }
 
 /**
- * @param xs VectorDouble Array of x coordinates
- * @param ys VectorDouble Array of y coordinates
- * @param parts VectorUInt Array of indices into xs/ys where each part starts
- * @param sizes VectorUInt Array of number of parts for each feature
- * @param convertToUTM boolean Whether to convert to UTM
+ * LineCollection class.
  */
 export class LineCollection extends GeometryCollection {
+  /**
+   * Constructor for the line collection class
+   * @param xs VectorDouble Array of x coordinates
+   * @param ys VectorDouble Array of y coordinates
+   * @param parts VectorUInt Array of indices into xs/ys where each part starts
+   * @param sizes VectorUInt Array of number of parts for each feature
+   * @param convertToUTM boolean Whether to convert to UTM
+   */
   constructor(
     xs: VectorDouble,
     ys: VectorDouble,
@@ -62,20 +76,36 @@ export class LineCollection extends GeometryCollection {
   delete(): void;
 }
 
+/**
+ * Class representing a single point geometry
+ */
 export class Point {
+  /**
+   * Constructor for a single point geometry
+   */
   constructor();
+  /**
+   * Get the x-coordinate of the point
+   */
   getX(): VectorDouble;
+  /**
+   * Get the y-coordinate of the point
+   */
   getY(): VectorDouble;
 }
 
 /**
- * @param xs VectorDouble Array of x coordinates
- * @param ys VectorDouble Array of y coordinates
- * @param parts VectorUInt Array of indices into xs/ys where each part starts
- * @param sizes VectorUInt Array of number of parts for each feature
- * @param convertToUTM boolean Whether to convert to UTM
+ * PointCollection class.
  */
 export class PointCollection extends GeometryCollection {
+  /**
+   * Constructor for the point collection class
+   * @param xs VectorDouble Array of x coordinates
+   * @param ys VectorDouble Array of y coordinates
+   * @param parts VectorUInt Array of indices into xs/ys where each part starts
+   * @param sizes VectorUInt Array of number of parts for each feature
+   * @param convertToUTM boolean Whether to convert to UTM
+   */
   constructor(
     xs: VectorDouble,
     ys: VectorDouble,
@@ -88,160 +118,376 @@ export class PointCollection extends GeometryCollection {
   delete(): void;
 }
 
+/**
+ * Class representing a polygon geometry
+ */
 export class Polygon {
+  /**
+   * Constructor for the polygon class
+   */
   constructor();
-
+  /**
+   * Get the x-coordinates of the polygon vertices
+   */
   getX(): VectorDouble;
-
+  /**
+   * Get the y-coordinates of the polygon vertices
+   */
   getY(): VectorDouble;
-
+  /**
+   * Get the indices of holes in the polygon
+   */
   getHoles(): VectorUInt;
-
+  /**
+   * Get the indices where each part of the polygon starts
+   */
   getParts(): VectorUInt;
-
+  /**
+   * Add a part to the polygon
+   * @param arg0 Array of x coordinates
+   * @param arg1 Array of y coordinates
+   * @param arg2 Whether to fix the polygon
+   */
   addPart(arg0: VectorDouble, arg1: VectorDouble, arg2: boolean): void;
   delete(): void;
 }
 
+/**
+ * Vector class for unsigned integers
+ */
 export class VectorUInt {
+  /**
+   * Constructor for a vector of unsigned integers
+   */
   constructor();
-
+  /**
+   * Add an element to the end of the vector
+   * @param arg0 Element to add
+   */
   push_back(arg0: UnsignedInt): void;
-
+  /**
+   * Resize the vector
+   * @param arg0 New size
+   * @param arg1 Value to fill new elements with
+   */
   resize(arg0: UnsignedLong, arg1: UnsignedInt): void;
-
+  /**
+   * Get the size of the vector
+   */
   size(): UnsignedLong;
-
+  /**
+   * Get element at index
+   * @param arg0 Index
+   */
   get(arg0: UnsignedLong): any;
-
+  /**
+   * Set element at index
+   * @param arg0 Index
+   * @param arg1 Value
+   */
   set(arg0: UnsignedLong, arg1: UnsignedInt): boolean;
   delete(): void;
 }
 
+/**
+ * Vector class for storing vectors of unsigned integers
+ */
 export class VecVecUInt {
+  /**
+   * Constructor for a vector of vectors of unsigned integers
+   */
   constructor();
-
+  /**
+   * Add a vector to the end
+   * @param arg0 Vector to add
+   */
   push_back(arg0: VectorUInt): void;
-
+  /**
+   * Resize the vector
+   * @param arg0 New size
+   * @param arg1 Value to fill new elements with
+   */
   resize(arg0: UnsignedLong, arg1: VectorUInt): void;
-
+  /**
+   * Get the size of the vector
+   */
   size(): UnsignedLong;
-
+  /**
+   * Get vector at index
+   * @param arg0 Index
+   */
   get(arg0: UnsignedLong): any;
-
+  /**
+   * Set vector at index
+   * @param arg0 Index
+   * @param arg1 Value
+   */
   set(arg0: UnsignedLong, arg1: VectorUInt): boolean;
   delete(): void;
 }
 
+/**
+ * Vector class for integers
+ */
 export class VectorInt {
+  /**
+   * Constructor for a vector of integers
+   */
   constructor();
-
+  /**
+   * Add an element to the end
+   * @param arg0 Element to add
+   */
   push_back(arg0: Int): void;
-
+  /**
+   * Resize the vector
+   * @param arg0 New size
+   * @param arg1 Value to fill new elements with
+   */
   resize(arg0: UnsignedLong, arg1: Int): void;
-
+  /**
+   * Get the size of the vector
+   */
   size(): UnsignedLong;
-
+  /**
+   * Get element at index
+   * @param arg0 Index
+   */
   get(arg0: UnsignedLong): any;
-
+  /**
+   * Set element at index
+   * @param arg0 Index
+   * @param arg1 Value
+   */
   set(arg0: UnsignedLong, arg1: Int): boolean;
   delete(): void;
 }
 
+/**
+ * Vector class for storing vectors of integers
+ */
 export class VecVecInt {
+  /**
+   * Constructor for a vector of vectors of integers
+   */
   constructor();
-
+  /**
+   * Add a vector to the end
+   * @param arg0 Vector to add
+   */
   push_back(arg0: VectorInt): void;
-
+  /**
+   * Resize the vector
+   * @param arg0 New size
+   * @param arg1 Value to fill new elements with
+   */
   resize(arg0: UnsignedLong, arg1: VectorInt): void;
-
+  /**
+   * Get the size of the vector
+   */
   size(): UnsignedLong;
-
+  /**
+   * Get vector at index
+   * @param arg0 Index
+   */
   get(arg0: UnsignedLong): any;
-
+  /**
+   * Set vector at index
+   * @param arg0 Index
+   * @param arg1 Value
+   */
   set(arg0: UnsignedLong, arg1: VectorInt): boolean;
   delete(): void;
 }
 
+/**
+ * Vector class for double precision floating point numbers
+ */
 export class VectorDouble {
+  /**
+   * Constructor for a vector of double precision floating point numbers
+   */
   constructor();
-
+  /**
+   * Add an element to the end
+   * @param arg0 Element to add
+   */
   push_back(arg0: Double): void;
-
+  /**
+   * Resize the vector
+   * @param arg0 New size
+   * @param arg1 Value to fill new elements with
+   */
   resize(arg0: UnsignedLong, arg1: Double): void;
-
+  /**
+   * Get the size of the vector
+   */
   size(): UnsignedLong;
-
+  /**
+   * Get element at index
+   * @param arg0 Index
+   */
   get(arg0: UnsignedLong): any;
-
+  /**
+   * Set element at index
+   * @param arg0 Index
+   * @param arg1 Value
+   */
   set(arg0: UnsignedLong, arg1: Double): boolean;
   delete(): void;
 }
 
+/**
+ * Vector class for storing vectors of doubles
+ */
 export class VecVecDouble {
+  /**
+   * Constructor for a vector of vectors of doubles
+   */
   constructor();
-
+  /**
+   * Add a vector to the end
+   * @param arg0 Vector to add
+   */
   push_back(arg0: VectorDouble): void;
-
+  /**
+   * Resize the vector
+   * @param arg0 New size
+   * @param arg1 Value to fill new elements with
+   */
   resize(arg0: UnsignedLong, arg1: VectorDouble): void;
-
+  /**
+   * Get the size of the vector
+   */
   size(): UnsignedLong;
-
+  /**
+   * Get vector at index
+   * @param arg0 Index
+   */
   get(arg0: UnsignedLong): any;
-
+  /**
+   * Set vector at index
+   * @param arg0 Index
+   * @param arg1 Value
+   */
   set(arg0: UnsignedLong, arg1: VectorDouble): boolean;
   delete(): void;
 }
 
+/**
+ * Vector class for storing polygons
+ */
 export class VectorPolygon {
+  /**
+   * Constructor for a vector of polygons
+   */
   constructor();
-
+  /**
+   * Add a polygon to the end
+   * @param arg0 Polygon to add
+   */
   push_back(arg0: Polygon): void;
-
+  /**
+   * Resize the vector
+   * @param arg0 New size
+   * @param arg1 Value to fill new elements with
+   */
   resize(arg0: UnsignedLong, arg1: Polygon): void;
-
+  /**
+   * Get the size of the vector
+   */
   size(): UnsignedLong;
-
+  /**
+   * Get polygon at index
+   * @param arg0 Index
+   */
   get(arg0: UnsignedLong): any;
-
+  /**
+   * Set polygon at index
+   * @param arg0 Index
+   * @param arg1 Value
+   */
   set(arg0: UnsignedLong, arg1: Polygon): boolean;
   delete(): void;
 }
 
+/**
+ * Vector class for storing strings
+ */
 export class VectorString {
+  /**
+   * Constructor for a vector of strings
+   */
   constructor();
-
+  /**
+   * Add a string to the end
+   * @param arg0 String to add
+   */
   push_back(arg0: string): void;
-
+  /**
+   * Resize the vector
+   * @param arg0 New size
+   * @param arg1 Value to fill new elements with
+   */
   resize(arg0: UnsignedLong, arg1: string): void;
-
+  /**
+   * Get the size of the vector
+   */
   size(): UnsignedLong;
-
+  /**
+   * Get string at index
+   * @param arg0 Index
+   */
   get(arg0: UnsignedLong): string;
-
+  /**
+   * Set string at index
+   * @param arg0 Index
+   * @param arg1 Value
+   */
   set(arg0: UnsignedLong, arg1: string): boolean;
   delete(): void;
 }
 
+/**
+ * Class representing results from LISA (Local Indicators of Spatial Association) analysis
+ */
 export class LisaResult {
+  /**
+   * Check if the result is valid
+   */
   isValid(): boolean;
-
+  /**
+   * Get the p-values for each observation
+   */
   getPValues(): VectorDouble;
-
+  /**
+   * Get the cluster assignments for each observation
+   */
   getClusters(): VectorUInt;
-
+  /**
+   * Get the spatial lag values
+   */
   getLagValues(): VectorDouble;
-
+  /**
+   * Get the LISA statistic values
+   */
   getLisaValues(): VectorDouble;
-
+  /**
+   * Get the significance categories
+   */
   getSignificanceCategories(): VectorInt;
-
+  /**
+   * Get the number of neighbors for each observation
+   */
   getNN(): VectorInt;
-
+  /**
+   * Get the labels for the clusters
+   */
   getLabels(): VectorString;
-
+  /**
+   * Get the colors associated with each cluster
+   */
   getColors(): VectorString;
-
   delete(): void;
 }
 
@@ -250,41 +496,167 @@ export class LisaResult {
  */
 export class DiagnosticReport {
   delete(): void;
+  /**
+   * Get the number of observations
+   */
   GetNoObservation(): number;
+  /**
+   * Get the number of variables
+   */
   GetNoVariable(): number;
+  /**
+   * Check if the constant is included
+   */
   IncludeConstant(): boolean;
+  /**
+   * Get the name of the independent variable at index
+   * @param i Index
+   */
   GetXVarName(i: number): string;
+  /**
+   * Get the coefficient of the independent variable at index
+   * @param i Index
+   */
   GetCoefficient(i: number): Double;
+  /**
+   * Get the standard error of the independent variable at index
+   * @param i Index
+   */
   GetStdError(i: number): Double;
+  /**
+   * Get the z-value of the independent variable at index
+   * @param i Index
+   */
   GetZValue(i: number): Double;
+  /**
+   * Get the probability of the independent variable at index
+   * @param i Index
+   */
   GetProbability(i: number): Double;
+  /**
+   * Get the R-squared value
+   */
   GetR2(): number;
+  /**
+   * Get the adjusted R-squared value
+   */
   GetR2_adjust(): number;
+  /**
+   * Get the Buse R-squared value
+   */
   GetR2_buse(): number;
+  /**
+   * Get the likelihood value
+   */
   GetLIK(): number;
+  /**
+   * Get the Akaike Information Criterion (AIC) value
+   */
   GetAIC(): number;
+  /**
+   * Get the OLS SC value
+   */
   GetOLS_SC(): number;
+  /**
+   * Get the residual sum of squares (RSS) value
+   */
   GetRSS(): number;
+  /**
+   * Get the Rho value
+   */
   GetRho(): number;
+  /**
+   * Get the F-test value
+   */
   GetFtest(): number;
+  /**
+   * Get the F-test probability value
+   */
   GetFtestProb(): number;
+  /**
+   * Get the SIQ_SQ value
+   */
   GetSIQ_SQ(): number;
+  /**
+   * Get the SIQ_SQLM value
+   */
   GetSIQ_SQLM(): number;
+  /**
+   * Get the condition number
+   */
   GetConditionNumber(): number;
+  /**
+   * Get the JB test value for the independent variable at index
+   * @param i Index
+   */
   GetJBtest(i: number): Double;
+  /**
+   * Get the BP test value for the independent variable at index
+   * @param i Index
+   */
   GetBPtest(i: number): Double;
+  /**
+   * Get the LR test value for the independent variable at index
+   * @param i Index
+   */
   GetLRTestValue(i: number): Double;
+  /**
+   * Get the Spatial BP test value for the independent variable at index
+   * @param i Index
+   */
   GetSpatialBPtest(i: number): Double;
+  /**
+   * Get the KB test value for the independent variable at index
+   * @param i Index
+   */
   GetKBtest(i: number): Double;
+  /**
+   * Get the white test value for the independent variable at index
+   * @param i Index
+   */
   GetWhitetest(i: number): Double;
+  /**
+   * Get the Moran I value for the independent variable at index
+   * @param i Index
+   */
   GetMoranI(i: number): Double;
+  /**
+   * Get the LMLAG value for the independent variable at index
+   * @param i Index
+   */
   GetLMLAG(i: number): Double;
+  /**
+   * Get the LMLAGRob value for the independent variable at index
+   * @param i Index
+   */
   GetLMLAGRob(i: number): Double;
+  /**
+   * Get the LMERR value for the independent variable at index
+   * @param i Index
+   */
   GetLMERR(i: number): Double;
+  /**
+   * Get the LMERRRob value for the independent variable at index
+   * @param i Index
+   */
   GetLMERRRob(i: number): Double;
+  /**
+   * Get the LMSarma value for the independent variable at index
+   * @param i Index
+   */
   GetLMSarma(i: number): Double;
+  /**
+   * Get the KelRobin value for the independent variable at index
+   * @param i Index
+   */
   GetKelRobin(i: number): Double;
+  /**
+   * Get the mean of the dependent variable
+   */
   GetMeanY(): number;
+  /**
+   * Get the standard deviation of the dependent variable
+   */
   GetSDevY(): number;
 }
 

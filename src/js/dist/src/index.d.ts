@@ -1,5 +1,5 @@
 export type { GeoDaModule as GeoDaInterface } from '../wasm';
-export { initWASM as initGeoDa, resetWASM as resetGeoDa, setWASM as setGeoDa, getWASM as getGeoDa, setDeliveryWASM as setGeoDaDelivery } from './init';
+export { initWASM as initGeoDa, resetWASM as resetGeoDa, setWASM as setGeoDa, getWASM as getGeoDa, setDeliveryWASM as setGeoDaDelivery, getDeliveryWASM as getGeoDaDelivery } from './init';
 export * from './weights/distance-neighbors';
 export * from './weights/nearest-neighbors';
 export * from './weights/contiguity-neighbors';
